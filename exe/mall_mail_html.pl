@@ -46,8 +46,8 @@ if(!open(LOG_FILE, "> $log_file_name")) {
 my $output_up_data_dir="../up_data";
 #出力ファイル名
 my $output_file_name_time= "$year$mon$mday";
-my $output_file_rakuten_name="$output_up_data_dir"."/".$output_file_name_time."_rakuten"."html";
-my $output_file_yahoo_name="$output_up_data_dir"."/".$output_file_name_time."_yahoo"."html";
+my $output_file_rakuten_name="$output_up_data_dir"."/".$output_file_name_time."_rakuten".".html";
+my $output_file_yahoo_name="$output_up_data_dir"."/".$output_file_name_time."_yahoo".".html";
 
 #出力先ディレクトリの作成
 unless(-d $output_up_data_dir) {
@@ -114,8 +114,10 @@ $yahoo_renew = Encode::encode('Shift_JIS', $yahoo_renew);
 # print $yahoo_renew."\n";
 
 ####################
-## HTMLの取得
+## HTMLの中の要素取得
 ####################
+
+####### 楽天 #######
 
 my $tree = HTML::TreeBuilder->new;
 $tree->parse($rakuten_new);
@@ -140,6 +142,68 @@ my @img_url_list =  $tree->look_down('class', 'itemsA clearfix')->find('img');
 for my $img_li (@img_url_list) {
     print $img_li->attr('src')."\n"
 }
+
+####################
+## HTMLの作成
+####################
+
+# 楽天店用のHTML
+my $rakuten_html ="";
+# HTMLのヘッダー・共通部分
+my $rakuten_html_header = 
+<<"HTML_STR_1";
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-2022-jp" />
+<title>ハイ・ファッション・ファクトリー</title>
+</head>
+<body>
+<div align="center">
+
+<a href="http://www.rakuten.ne.jp/gold/hff/" target="_blank"><img src="http://image.rakuten.co.jp/hff/cabinet/mail/mailmagazine_header2.gif" alt="HIGH FASHION FACTORY" border="0" width="100%"></a>
+
+<!-- バナー×２ start-->
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+<tr>
+<td width="50%">
+<a href="http://item.rakuten.co.jp/hff/c/0000000591/" target="_blank"><img src="http://image.rakuten.co.jp/hff/cabinet/mail/150411/tagliatore_150324.jpg" alt="" width="100%" border="0"></a>
+</td>
+<td width="50%">
+<a href="http://item.rakuten.co.jp/hff/c/0000000486/" target="_blank"><img src="http://image.rakuten.co.jp/hff/cabinet/mail/150411/lardini_150324.jpg" alt="" width="100%" border="0"></a>
+</td>
+</tr>
+</table>
+<!-- バナー×２ end-->
+
+<!-- 新着商品 start-->
+HTML_STR_1
+	Encode::from_to( $rakuten_html_header, 'utf8', 'shiftjis' );
+# 新着商品のバナー
+my $rakuten_newitem_banner =
+<<"HTML_STR_2";
+<br>
+<img src="http://image.rakuten.co.jp/hff/cabinet/mail/mailmagazine_new3.gif" alt="新着商品" width="100%">
+HTML_STR_2
+	for(my $i=1; $i<=20; $i++) {
+		my $table_new_item ="";
+		my $header ="<table width=\"100%\" cellpadding=\"0\" cellspacing=\"1\">\n";
+		my $mon_h = $mon+1;
+		my $tr_day = "<tr>\n<td height=\"19\" align=\"center\" bgcolor=\"#EEEEEE\"><font size=\"3\">$mon_h月$mday日</font></td>\n</tr>\n";
+		Encode::from_to( $tr_day, 'utf8', 'shiftjis' );
+=pod
+		my $tr_link =	<tr>
+			  <td align="center"><a href="http://item.rakuten.co.jp/hff/16170/" target="_blank"><img src="http://image.rakuten.co.jp/hff/cabinet/pic/aniary/1/1617011_1.jpg" border="0" width="100%"></a></td>
+			</tr>
+			<tr>
+			  <td colspan="2" align="center"><font size="2" color="#7E6E4D">アニアリ</font></td>
+			</tr>
+
+			<tr>
+			  <td align="left"><a href="http://item.rakuten.co.jp/hff/16170/" target="_blank"><font size="3" color="#202020">90-20003 カブセ長財布 クロコ</font></a></td>
+			</tr>
+		</table>
+=cut
+	}
 
 =pod
 my @rakuten_li = split(/<li>/,$rakuten_new);
