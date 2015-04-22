@@ -15,6 +15,7 @@ use Encode;
 use File::Path;
 use LWP::UserAgent;
 use LWP::Simple;
+use HTML::TreeBuilder;
 
 ####################
 ##　ログファイル
@@ -81,25 +82,70 @@ my $rakuten_renew_url = 'http://www.rakuten.ne.jp/gold/hff/hitoke/renewitem20.ht
 # 楽天のランキングURL
 my $rakuten_ranking_url = 'http://www.rakuten.ne.jp/gold/hff/hitoke/ranking.html';
 
+# HTMLを取得
 # LWP::Simpleの「get」関数を使用                                                
 # 楽天店の新着HTML取得
 my $rakuten_new = get($rakuten_new_url) or die "Couldn't get it!";
 $rakuten_new = Encode::encode('Shift_JIS', $rakuten_new);
-
 # 楽天店の再入荷HTML取得
 my $rakuten_renew = get($rakuten_renew_url) or die "Couldn't get it!";
 $rakuten_renew = Encode::encode('Shift_JIS', $rakuten_renew);
-
 # 楽天店のランキングHTML取得
 my $rakuten_ranking = get($rakuten_ranking_url) or die "Couldn't get it!";
 $rakuten_ranking = Encode::encode('Shift_JIS', $rakuten_ranking);
 
 ####### ヤフー #######
 
-print $rakuten_new."\n";
-print $rakuten_renew."\n";
-print $rakuten_ranking."\n";
+# ヤフーの新着URL
+my $yahoo_new_url = 'http://shopping.geocities.jp/hff/hitoke/newitem.html';
+# ヤフーの再入荷URL
+my $yahoo_renew_url = 'http://shopping.geocities.jp/hff/hitoke/renewitem.html';
 
+# HTMLを取得
+# LWP::Simpleの「get」関数を使用                                                
+# ヤフー店の新着HTML取得
+my $yahoo_new = get($yahoo_new_url) or die "Couldn't get it!";
+$yahoo_new = Encode::encode('Shift_JIS', $yahoo_new);
+# ヤフー店の再入荷HTML取得
+my $yahoo_renew = get($yahoo_renew_url) or die "Couldn't get it!";
+$yahoo_renew = Encode::encode('Shift_JIS', $yahoo_renew);
+
+# print $yahoo_new."\n";
+# print $yahoo_renew."\n";
+
+####################
+## HTMLの取得
+####################
+
+my $tree = HTML::TreeBuilder->new;
+$tree->parse($rakuten_new);
+# ブランドのリストを作成する
+my @brand_list =  $tree->look_down('class', 'itemTitle');
+for my $brand_li (@brand_list) {
+    print $brand_li->as_text."\n"
+}
+# アイテム名のリストを作成する
+my @item_list =  $tree->look_down('class', 'itemText');
+for my $item_li (@item_list) {
+    print $item_li->as_text."\n"
+}
+# リンクのリストを作成する
+my @link_list =  $tree->find('a');
+for my $link (@link_list) {
+    print $link->attr('href')."\n"
+}
+
+# 画像のリストを作成する
+my @img_url_list =  $tree->look_down('class', 'itemsA clearfix')->find('img');
+for my $img_li (@img_url_list) {
+    print $img_li->attr('src')."\n"
+}
+
+=pod
+my @rakuten_li = split(/<li>/,$rakuten_new);
+
+print $rakuten_li[1]."\n";
+=cut
 exit;
 =pod
 ####################
