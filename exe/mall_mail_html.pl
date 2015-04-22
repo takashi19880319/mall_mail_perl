@@ -12,11 +12,9 @@ use strict;
 use warnings;
 use Cwd;
 use Encode;
-use XML::Simple;
-use Text::ParseWords;
-use Text::CSV_XS;
 use File::Path;
-LWP::UserAgent;
+use LWP::UserAgent;
+use LWP::Simple;
 
 ####################
 ##　ログファイル
@@ -46,8 +44,7 @@ if(!open(LOG_FILE, "> $log_file_name")) {
 #出力ディレクトリ
 my $output_up_data_dir="../up_data";
 #出力ファイル名
-my ($mday,$mon,$year) = (localtime(time))[3..5];
-my $output_file_name_time= $year$mon$mday;
+my $output_file_name_time= "$year$mon$mday";
 my $output_file_rakuten_name="$output_up_data_dir"."/".$output_file_name_time."_rakuten"."html";
 my $output_file_yahoo_name="$output_up_data_dir"."/".$output_file_name_time."_yahoo"."html";
 
@@ -75,6 +72,8 @@ if (!open $output_yiframe_file_disc, ">", $output_file_yahoo_name) {
 ## HTMLの取得
 ####################
 
+####### 楽天 #######
+
 # 楽天の新着URL
 my $rakuten_new_url = 'http://www.rakuten.ne.jp/gold/hff/hitoke/newitem20.html';
 # 楽天の再入荷URL
@@ -82,24 +81,27 @@ my $rakuten_renew_url = 'http://www.rakuten.ne.jp/gold/hff/hitoke/renewitem20.ht
 # 楽天のランキングURL
 my $rakuten_ranking_url = 'http://www.rakuten.ne.jp/gold/hff/hitoke/ranking.html';
 
-# IE8のフリをする
-my $user_agent = "Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1; Trident/4.0)";
-# LWPを使ってサイトにアクセスし、HTMLの内容を取得する
-my $ua = LWP::UserAgent->new('agent' => $user_agent);
-
+# LWP::Simpleの「get」関数を使用                                                
 # 楽天店の新着HTML取得
-my $rakuten_new = $ua->get($rakuten_new_url);
+my $rakuten_new = get($rakuten_new_url) or die "Couldn't get it!";
+$rakuten_new = Encode::encode('Shift_JIS', $rakuten_new);
+
 # 楽天店の再入荷HTML取得
-my $rakuten_renew = $ua->get($rakuten_renew_url);
+my $rakuten_renew = get($rakuten_renew_url) or die "Couldn't get it!";
+$rakuten_renew = Encode::encode('Shift_JIS', $rakuten_renew);
+
 # 楽天店のランキングHTML取得
-my $rakuten_ranking = $ua->get($rakuten_ranking_url);
+my $rakuten_ranking = get($rakuten_ranking_url) or die "Couldn't get it!";
+$rakuten_ranking = Encode::encode('Shift_JIS', $rakuten_ranking);
+
+####### ヤフー #######
 
 print $rakuten_new."\n";
 print $rakuten_renew."\n";
 print $rakuten_ranking."\n";
 
 exit;
-
+=pod
 ####################
 ## 各関数間に跨って使用するグローバル変数
 ####################
@@ -349,8 +351,11 @@ $output_goods_img_csv->eof;
 close $input_goods_file_disc;
 # 出力ファイルのクローズ
 close $output_goods_img_disc;
+=cut
+
 close(LOG_FILE);
 
+=pod
 ##############################
 ## goods_img.csvファイルに項目名を追加
 ##############################
@@ -423,3 +428,4 @@ sub to_YYYYMMDD_string {
   my $result = sprintf("%04d%02d%02d %02d:%02d:%02d", $year + 1900, $mon + 1, $mday, $hour, $min, $sec);
   return $result;
 }
+=cut
