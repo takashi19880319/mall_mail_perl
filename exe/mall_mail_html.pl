@@ -45,7 +45,7 @@ if(!open(LOG_FILE, "> $log_file_name")) {
 #出力ディレクトリ
 my $output_up_data_dir="../up_data";
 #出力ファイル名
-my $output_file_name_time= "$year$mon$mday";
+my $output_file_name_time= sprintf("%04d%02d%02d", $year + 1900, $mon + 1,$mday);
 my $output_file_rakuten_name="$output_up_data_dir"."/".$output_file_name_time."_rakuten".".html";
 my $output_file_yahoo_name="$output_up_data_dir"."/".$output_file_name_time."_yahoo".".html";
 
@@ -59,13 +59,13 @@ unless(-d $output_up_data_dir) {
 }
 
 #出力ファイルのオープン
-my $output_riframe_file_disc;
-my $output_yiframe_file_disc;
-if (!open $output_riframe_file_disc, ">", $output_file_rakuten_name) {
+my $output_rhtml_file_disc;
+my $output_yhtml_file_disc;
+if (!open $output_rhtml_file_disc, ">", $output_file_rakuten_name) {
 	&output_log("ERROR!!($!) $output_file_rakuten_name open failed.");
 	exit 1;
 }
-if (!open $output_yiframe_file_disc, ">", $output_file_yahoo_name) {
+if (!open $output_yhtml_file_disc, ">", $output_file_yahoo_name) {
 	&output_log("ERROR!!($!) $output_file_yahoo_name open failed.");
 	exit 1;
 }
@@ -124,73 +124,113 @@ $yahoo_renew = Encode::encode('Shift_JIS', $yahoo_renew);
 my $tree = HTML::TreeBuilder->new;
 $tree->parse($rakuten_new);
 # ブランドのリストを作成する
-my @brand_list_place = $tree->look_down('class', 'itemTitle');
-my @brand_list =();
-for my $brand_li (@brand_list_place) {
-     push(@brand_list,$brand_li->as_text);
+my @new_brand_list_place = $tree->look_down('class', 'itemTitle');
+my @new_brand_list =();
+for my $brand_li (@new_brand_list_place) {
+     push(@new_brand_list,$brand_li->as_text);
 }
 
 # アイテム名のリストを作成する
-my @item_list_place =  $tree->look_down('class', 'itemText');
-my @item_list = ();
-for my $item_li (@item_list_place) {
-    push (@item_list,$item_li->as_text);
+my @new_item_list_place =  $tree->look_down('class', 'itemText');
+my @new_item_list = ();
+for my $item_li (@new_item_list_place) {
+    push (@new_item_list,$item_li->as_text);
 }
 
 # リンクのリストを作成する
-my @link_list_place =  $tree->find('a');
-my @link_list = ();
-for my $link (@link_list_place) {
-    push (@link_list,$link->attr('href'));
+my @new_link_list_place =  $tree->find('a');
+my @new_link_list = ();
+for my $link (@new_link_list_place) {
+    push (@new_link_list,$link->attr('href'));
 }
 
 # 画像のリストを作成する
-my @img_url_list_place =  $tree->look_down('class', 'itemsA clearfix')->find('img');
-my @img_url_list =();
-for my $img_li (@img_url_list_place) {
+my @new_img_url_list_place =  $tree->look_down('class', 'itemsA clearfix')->find('img');
+my @new_img_url_list =();
+for my $img_li (@new_img_url_list_place) {
     my $img_src = "";
     $img_src = $img_li->attr('src');
-    $img_src =~ s/thumbnail//g;
+    $img_src =~ s/thumbnail.//g;
     $img_src =~ s/\/\@0_mall//g;
     $img_src =~ s/\?_ex=142x142//g;
-    push (@img_url_list,$img_src);
+    push (@new_img_url_list,$img_src);
 }
-
 ## 再入荷商品 ##
-
-my $tree = HTML::TreeBuilder->new;
-$tree->parse($rakuten_renew);
+my $tree_renew = HTML::TreeBuilder->new;
+$tree_renew->parse($rakuten_renew);
 # ブランドのリストを作成する
-my @brand_list_place = $tree->look_down('class', 'itemTitle');
-my @brand_list =();
-for my $brand_li (@brand_list_place) {
-     push(@brand_list,$brand_li->as_text);
+my @renew_brand_list_place = $tree_renew->look_down('class', 'itemTitle');
+my @renew_brand_list =();
+for my $brand_li (@renew_brand_list_place) {
+     push(@renew_brand_list,$brand_li->as_text);
 }
 
 # アイテム名のリストを作成する
-my @item_list_place =  $tree->look_down('class', 'itemText');
-my @item_list = ();
-for my $item_li (@item_list_place) {
-    push (@item_list,$item_li->as_text);
+my @renew_item_list_place =  $tree_renew->look_down('class', 'itemText');
+my @renew_item_list = ();
+for my $item_li (@renew_item_list_place) {
+    push (@renew_item_list,$item_li->as_text);
 }
 
 # リンクのリストを作成する
-my @link_list_place =  $tree->find('a');
-my @link_list = ();
-for my $link (@link_list_place) {
-    push (@link_list,$link->attr('href'));
+my @renew_link_list_place =  $tree_renew->find('a');
+my @renew_link_list = ();
+for my $link (@renew_link_list_place) {
+    push (@renew_link_list,$link->attr('href'));
 }
 
 # 画像のリストを作成する
-my @img_url_list_place =  $tree->look_down('class', 'itemsA clearfix')->find('img');
-my @img_url_list =();
-for my $img_li (@img_url_list_place) {
+my @renew_img_url_list_place =  $tree_renew->look_down('class', 'itemsA clearfix')->find('img');
+my @renew_img_url_list =();
+for my $img_li (@renew_img_url_list_place) {
     my $img_src = "";
     $img_src = $img_li->attr('src');
-    $img_src =~ s/thumbnail//g;
+    $img_src =~ s/thumbnail.//g;
     $img_src =~ s/\/\@0_mall//g;
     $img_src =~ s/\?_ex=142x142//g;
-    push (@img_url_list,$img_src);
+    push (@renew_img_url_list,$img_src);
+}
+
+## ランキング商品 ##
+my $tree_ranking = HTML::TreeBuilder->new;
+$tree_ranking->parse($rakuten_ranking);
+# ブランドのリストを作成する
+my @ranking_brand_list_place = $tree_ranking->look_down('class', 'itemTitle');
+my @ranking_brand_list =();
+for my $brand_li (@ranking_brand_list_place) {
+     push(@ranking_brand_list,$brand_li->as_text);
+}
+
+# アイテム名のリストを作成する
+my @ranking_item_list_place =  $tree_ranking->look_down('class', 'itemText');
+my @ranking_item_list = ();
+for my $item_li (@ranking_item_list_place) {
+    push (@ranking_item_list,$item_li->as_text);
+}
+
+# リンクのリストを作成する
+my @ranking_link_list_place =  $tree_ranking->find('a');
+my @ranking_link_list = ();
+for my $link (@ranking_link_list_place) {
+    push (@ranking_link_list,$link->attr('href'));
+}
+
+# 画像のリストを作成する
+my @ranking_img_url_list_place = $tree_ranking->look_down('class', 'itemsA clearfix')->find('img');
+my @ranking_img_url_list =();
+my $img_list_count = @ranking_img_url_list_place;
+for my $img_li (@ranking_img_url_list_place) {
+    my $img_src = "";
+    $img_src = $img_li->attr('src');
+    if($img_src =~ /ranking/){
+	next;
+    }
+    else {
+	    $img_src =~ s/thumbnail.//g;
+	    $img_src =~ s/\/\@0_mall//g;
+	    $img_src =~ s/\?_ex=142x142//g;
+	    push (@ranking_img_url_list,$img_src);
+    }
 }
 
 ####################
@@ -228,32 +268,166 @@ my $rakuten_html_header =
 <!-- 新着商品 start-->
 HTML_STR_1
 	Encode::from_to( $rakuten_html_header, 'utf8', 'shiftjis' );
-# 新着商品のバナー
+	# HTMLのヘッダーを追加
+	$rakuten_html .= $rakuten_html_header;
+# 新着商品スタート
 my $rakuten_newitem_banner =
 <<"HTML_STR_2";
 <br>
 <img src="http://image.rakuten.co.jp/hff/cabinet/mail/mailmagazine_new3.gif" alt="新着商品" width="100%">
+
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
 HTML_STR_2
+Encode::from_to( $rakuten_newitem_banner, 'utf8', 'shiftjis' );
 	my $table_new_item ="";
-	for(my $i=1; $i<=20; $i++) {
-		my $header ="<table width=\"100%\" cellpadding=\"0\" cellspacing=\"1\">\n";
+	$table_new_item .= $rakuten_newitem_banner;
+	for(my $i=0; $i<=8; $i++) {
+		# 大枠tableの行挿入
+		if($i%3 == 0){
+			$table_new_item .="<tr valign=\"top\">\n";
+		}
+		my $header ="<td width=\"32%\">\n<table width=\"100%\" cellpadding=\"0\" cellspacing=\"1\">\n";
+		# 最初の3つのtdのみ<td width="32%">
+		if($i>=3){
+			$header ="<td>\n<table width=\"100%\" cellpadding=\"0\" cellspacing=\"1\">\n";
+		}
 		my $mon_h = $mon+1;
 		my $tr_day = "<tr>\n<td height=\"19\" align=\"center\" bgcolor=\"#EEEEEE\"><font size=\"3\">$mon_h月$mday日</font></td>\n</tr>\n";
 		Encode::from_to( $tr_day, 'utf8', 'shiftjis' );
-		my $tr_td_link ="<tr>\n<td align=\"center\"><a href=\"$link_list[$i]\" target=\"_blank\">\n";
-		my $tr_td_img ="<img src=\"$img_url_list[$i]\" border=\"0\" width=\"100%\"></a></td>\n</tr>";
-		my $tr_brand ="<tr>\n<td colspan=\"2\" align=\"center\"><font size=\"2\" color=\"#7E6E4D\">$brand_list[$i]</font></td>\n</tr>\n";
-		my $tr_name ="<tr>\n<td align=\"left\"><a href=\"$link_list[$i]\" target=\"_blank\"><font size=\"3\" color=\"#202020\">$item_list[$i]</font></a></td>\n</tr>\n</table>";
+		my $tr_td_link ="<tr>\n<td align=\"center\"><a href=\"$new_link_list[$i]\" target=\"_blank\">\n";
+		my $tr_td_img ="<img src=\"$new_img_url_list[$i]\" border=\"0\" width=\"100%\"></a></td>\n</tr>\n";
+		my $tr_brand ="<tr>\n<td colspan=\"2\" align=\"center\"><font size=\"2\" color=\"#7E6E4D\">$new_brand_list[$i]</font></td>\n</tr>\n";
+		my $tr_name ="<tr>\n<td align=\"left\"><a href=\"$new_link_list[$i]\" target=\"_blank\"><font size=\"3\" color=\"#202020\">$new_item_list[$i]</font></a></td>\n</tr>\n</table>\n</td>\n";
 		$table_new_item .=$header.$tr_day.$tr_td_link.$tr_td_img.$tr_brand.$tr_name;
+		if($i%3 == 2){
+			$table_new_item .= "</tr>\n\n<tr>\n<td colspan=\"3\">\n<img src=\"http://image.rakuten.co.jp/hff/cabinet/mail/s.gif\" alt=\"\" width=\"1\" height=\"15\">\n</td>\n</tr>";
+		}
 	}
-	print $table_new_item."\n";
+# 新着商品エンド
+my $rakuten_newitem_footer =
+<<"HTML_STR_3";
+</table>
+<!-- 新着商品 end-->
+HTML_STR_3
+Encode::from_to( $rakuten_newitem_footer, 'utf8', 'shiftjis' );
+	$table_new_item .= $rakuten_newitem_footer;
+	# 新着エリアをHTMLに追加
+	$rakuten_html .= $table_new_item;
 
-=pod
-my @rakuten_li = split(/<li>/,$rakuten_new);
+# 再入荷商品スタート
+my $rakuten_renewitem_banner =
+<<"HTML_STR_4";
+<!-- 再入荷商品 start-->
+<img src="http://image.rakuten.co.jp/hff/cabinet/mail/mailmagazine_re.gif" alt="再入荷商品" width="100%">
 
-print $rakuten_li[1]."\n";
-=cut
-exit;
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+HTML_STR_4
+Encode::from_to( $rakuten_renewitem_banner, 'utf8', 'shiftjis' );
+	my $table_renew_item ="";
+	$table_renew_item .= $rakuten_renewitem_banner;
+	for(my $i=0; $i<=5; $i++) {
+		# 大枠tableの行挿入
+		if($i%3 == 0){
+			$table_renew_item .="<tr valign=\"top\">\n";
+		}
+		my $header ="<td width=\"32%\">\n<table width=\"100%\" cellpadding=\"0\" cellspacing=\"1\">\n";
+		# 最初の3つのtdのみ<td width="32%">
+		if($i>=3){
+			$header ="<td>\n<table width=\"100%\" cellpadding=\"0\" cellspacing=\"1\">\n";
+		}
+		my $mon_h = $mon+1;
+		my $tr_day = "<tr>\n<td height=\"19\" align=\"center\" bgcolor=\"#EEEEEE\"><font size=\"3\">$mon_h月$mday日</font></td>\n</tr>\n";
+		Encode::from_to( $tr_day, 'utf8', 'shiftjis' );
+		my $tr_td_link ="<tr>\n<td align=\"center\"><a href=\"$renew_link_list[$i]\" target=\"_blank\">\n";
+		my $tr_td_img ="<img src=\"$renew_img_url_list[$i]\" border=\"0\" width=\"100%\"></a></td>\n</tr>\n";
+		my $tr_brand ="<tr>\n<td colspan=\"2\" align=\"center\"><font size=\"2\" color=\"#7E6E4D\">$renew_brand_list[$i]</font></td>\n</tr>\n";
+		my $tr_name ="<tr>\n<td align=\"left\"><a href=\"$renew_link_list[$i]\" target=\"_blank\"><font size=\"3\" color=\"#202020\">$renew_item_list[$i]</font></a></td>\n</tr>\n</table>\n</td>\n";
+		$table_renew_item .=$header.$tr_day.$tr_td_link.$tr_td_img.$tr_brand.$tr_name;
+		if($i%3 == 2){
+			$table_renew_item .= "</tr>\n\n<tr>\n<td colspan=\"3\">\n<img src=\"http://image.rakuten.co.jp/hff/cabinet/mail/s.gif\" alt=\"\" width=\"1\" height=\"15\">\n</td>\n</tr>\n";
+		}
+	}
+# 再入荷商品エンド
+my $rakuten_renewitem_footer =
+<<"HTML_STR_3";
+</table>
+<!-- 再入荷商品 end-->
+HTML_STR_3
+Encode::from_to( $rakuten_renewitem_footer, 'utf8', 'shiftjis' );
+	$table_renew_item .= $rakuten_renewitem_footer;
+	# 再入荷エリアをHTMLに追加
+	$rakuten_html .= $table_renew_item;
+
+# ランキング商品スタート
+my $rakuten_ranking_banner =
+<<"HTML_STR_4";
+<!-- ランキング start-->
+<img src="http://image.rakuten.co.jp/hff/cabinet/mail/mailmagazine_ranking.gif" alt="ランキング" width="100%">
+
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+HTML_STR_4
+Encode::from_to( $rakuten_ranking_banner, 'utf8', 'shiftjis' );
+	my $table_ranking_item ="";
+	$table_ranking_item .= $rakuten_ranking_banner;
+	for(my $i=0; $i<=2; $i++) {
+		# 大枠tableの行挿入
+		if($i%3 == 0){
+			$table_ranking_item .="<tr valign=\"top\">\n";
+		}
+		my $header ="<td width=\"32%\">\n<table width=\"100%\" cellpadding=\"0\" cellspacing=\"1\">\n";
+		# 最初の3つのtdのみ<td width="32%">
+		if($i>=3){
+			$header ="<td>\n<table width=\"100%\" cellpadding=\"0\" cellspacing=\"1\">\n";
+		}
+		my $mon_h = $mon+1;
+		my $tr_day = "<tr>\n<td height=\"19\" align=\"center\" bgcolor=\"#EEEEEE\"><font size=\"3\">$mon_h月$mday日</font></td>\n</tr>\n";
+		Encode::from_to( $tr_day, 'utf8', 'shiftjis' );
+		my $tr_td_link ="<tr>\n<td align=\"center\"><a href=\"$ranking_link_list[$i]\" target=\"_blank\">\n";
+		my $tr_td_img ="<img src=\"$ranking_img_url_list[$i]\" border=\"0\" width=\"100%\"></a></td>\n</tr>\n";
+		my $tr_brand ="<tr>\n<td colspan=\"2\" align=\"center\"><font size=\"2\" color=\"#7E6E4D\">$ranking_brand_list[$i]</font></td>\n</tr>\n";
+		my $tr_name ="<tr>\n<td align=\"left\"><a href=\"$ranking_link_list[$i]\" target=\"_blank\"><font size=\"3\" color=\"#202020\">$ranking_item_list[$i]</font></a></td>\n</tr>\n</table>\n</td>\n";
+		$table_ranking_item .=$header.$tr_day.$tr_td_link.$tr_td_img.$tr_brand.$tr_name;
+		if($i%3 == 2){
+			$table_ranking_item .= "</tr>\n\n<tr>\n<td colspan=\"3\">\n<img src=\"http://image.rakuten.co.jp/hff/cabinet/mail/s.gif\" alt=\"\" width=\"1\" height=\"15\">\n</td>\n</tr>\n";
+		}
+	}
+# ランキング商品エンド
+my $rakuten_ranking_item_footer =
+<<"HTML_STR_5";
+</table>
+<!-- ランキング end-->
+HTML_STR_5
+Encode::from_to( $rakuten_ranking_item_footer, 'utf8', 'shiftjis' );
+	$table_ranking_item .= $rakuten_ranking_item_footer;
+	# ランキングエリアをHTMLに追加
+	$rakuten_html .= $table_ranking_item;
+
+# フッター
+my $rakuten_footer =
+<<"HTML_STR_5";
+<!-- フッター start-->
+<table width="100%" bgcolor="#000" cellpadding="0" cellspacing="0">
+<tr>
+<td align="center" height="80" valign="middle">
+<font color="#fff" size="1">
+Copyright &copy; Newgene Ltd. All Rights Reserved.
+</font>
+</td>
+</tr>
+</table>
+<!-- フッター end -->
+
+</div>
+
+</body>
+</html>
+HTML_STR_5
+Encode::from_to($rakuten_footer, 'utf8', 'shiftjis');
+	# フッターをHTMLに追加
+	$rakuten_html .= $rakuten_footer;
+	# HTMLファイルに書き込み
+	print $output_rhtml_file_disc $rakuten_html;
+	close $output_rhtml_file_disc;
 =pod
 ####################
 ## 各関数間に跨って使用するグローバル変数
