@@ -119,28 +119,78 @@ $yahoo_renew = Encode::encode('Shift_JIS', $yahoo_renew);
 
 ####### 楽天 #######
 
+## 新着商品 ##
+
 my $tree = HTML::TreeBuilder->new;
 $tree->parse($rakuten_new);
 # ブランドのリストを作成する
-my @brand_list =  $tree->look_down('class', 'itemTitle');
-for my $brand_li (@brand_list) {
-    print $brand_li->as_text."\n"
+my @brand_list_place = $tree->look_down('class', 'itemTitle');
+my @brand_list =();
+for my $brand_li (@brand_list_place) {
+     push(@brand_list,$brand_li->as_text);
 }
+
 # アイテム名のリストを作成する
-my @item_list =  $tree->look_down('class', 'itemText');
-for my $item_li (@item_list) {
-    print $item_li->as_text."\n"
+my @item_list_place =  $tree->look_down('class', 'itemText');
+my @item_list = ();
+for my $item_li (@item_list_place) {
+    push (@item_list,$item_li->as_text);
 }
+
 # リンクのリストを作成する
-my @link_list =  $tree->find('a');
-for my $link (@link_list) {
-    print $link->attr('href')."\n"
+my @link_list_place =  $tree->find('a');
+my @link_list = ();
+for my $link (@link_list_place) {
+    push (@link_list,$link->attr('href'));
 }
 
 # 画像のリストを作成する
-my @img_url_list =  $tree->look_down('class', 'itemsA clearfix')->find('img');
-for my $img_li (@img_url_list) {
-    print $img_li->attr('src')."\n"
+my @img_url_list_place =  $tree->look_down('class', 'itemsA clearfix')->find('img');
+my @img_url_list =();
+for my $img_li (@img_url_list_place) {
+    my $img_src = "";
+    $img_src = $img_li->attr('src');
+    $img_src =~ s/thumbnail//g;
+    $img_src =~ s/\/\@0_mall//g;
+    $img_src =~ s/\?_ex=142x142//g;
+    push (@img_url_list,$img_src);
+}
+
+## 再入荷商品 ##
+
+my $tree = HTML::TreeBuilder->new;
+$tree->parse($rakuten_renew);
+# ブランドのリストを作成する
+my @brand_list_place = $tree->look_down('class', 'itemTitle');
+my @brand_list =();
+for my $brand_li (@brand_list_place) {
+     push(@brand_list,$brand_li->as_text);
+}
+
+# アイテム名のリストを作成する
+my @item_list_place =  $tree->look_down('class', 'itemText');
+my @item_list = ();
+for my $item_li (@item_list_place) {
+    push (@item_list,$item_li->as_text);
+}
+
+# リンクのリストを作成する
+my @link_list_place =  $tree->find('a');
+my @link_list = ();
+for my $link (@link_list_place) {
+    push (@link_list,$link->attr('href'));
+}
+
+# 画像のリストを作成する
+my @img_url_list_place =  $tree->look_down('class', 'itemsA clearfix')->find('img');
+my @img_url_list =();
+for my $img_li (@img_url_list_place) {
+    my $img_src = "";
+    $img_src = $img_li->attr('src');
+    $img_src =~ s/thumbnail//g;
+    $img_src =~ s/\/\@0_mall//g;
+    $img_src =~ s/\?_ex=142x142//g;
+    push (@img_url_list,$img_src);
 }
 
 ####################
@@ -184,26 +234,19 @@ my $rakuten_newitem_banner =
 <br>
 <img src="http://image.rakuten.co.jp/hff/cabinet/mail/mailmagazine_new3.gif" alt="新着商品" width="100%">
 HTML_STR_2
+	my $table_new_item ="";
 	for(my $i=1; $i<=20; $i++) {
-		my $table_new_item ="";
 		my $header ="<table width=\"100%\" cellpadding=\"0\" cellspacing=\"1\">\n";
 		my $mon_h = $mon+1;
 		my $tr_day = "<tr>\n<td height=\"19\" align=\"center\" bgcolor=\"#EEEEEE\"><font size=\"3\">$mon_h月$mday日</font></td>\n</tr>\n";
 		Encode::from_to( $tr_day, 'utf8', 'shiftjis' );
-=pod
-		my $tr_link =	<tr>
-			  <td align="center"><a href="http://item.rakuten.co.jp/hff/16170/" target="_blank"><img src="http://image.rakuten.co.jp/hff/cabinet/pic/aniary/1/1617011_1.jpg" border="0" width="100%"></a></td>
-			</tr>
-			<tr>
-			  <td colspan="2" align="center"><font size="2" color="#7E6E4D">アニアリ</font></td>
-			</tr>
-
-			<tr>
-			  <td align="left"><a href="http://item.rakuten.co.jp/hff/16170/" target="_blank"><font size="3" color="#202020">90-20003 カブセ長財布 クロコ</font></a></td>
-			</tr>
-		</table>
-=cut
+		my $tr_td_link ="<tr>\n<td align=\"center\"><a href=\"$link_list[$i]\" target=\"_blank\">\n";
+		my $tr_td_img ="<img src=\"$img_url_list[$i]\" border=\"0\" width=\"100%\"></a></td>\n</tr>";
+		my $tr_brand ="<tr>\n<td colspan=\"2\" align=\"center\"><font size=\"2\" color=\"#7E6E4D\">$brand_list[$i]</font></td>\n</tr>\n";
+		my $tr_name ="<tr>\n<td align=\"left\"><a href=\"$link_list[$i]\" target=\"_blank\"><font size=\"3\" color=\"#202020\">$item_list[$i]</font></a></td>\n</tr>\n</table>";
+		$table_new_item .=$header.$tr_day.$tr_td_link.$tr_td_img.$tr_brand.$tr_name;
 	}
+	print $table_new_item."\n";
 
 =pod
 my @rakuten_li = split(/<li>/,$rakuten_new);
