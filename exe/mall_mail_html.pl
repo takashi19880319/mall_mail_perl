@@ -374,19 +374,14 @@ Encode::from_to( $rakuten_ranking_banner, 'utf8', 'shiftjis' );
 		if($i%3 == 0){
 			$table_ranking_item .="<tr valign=\"top\">\n";
 		}
+		my $rank_num = $i+1;
 		my $header ="<td width=\"32%\">\n<table width=\"100%\" cellpadding=\"0\" cellspacing=\"1\">\n";
-		# 最初の3つのtdのみ<td width="32%">
-		if($i>=3){
-			$header ="<td>\n<table width=\"100%\" cellpadding=\"0\" cellspacing=\"1\">\n";
-		}
-		my $mon_h = $mon+1;
-		my $tr_day = "<tr>\n<td height=\"19\" align=\"center\" bgcolor=\"#EEEEEE\"><font size=\"3\">$mon_h月$mday日</font></td>\n</tr>\n";
-		Encode::from_to( $tr_day, 'utf8', 'shiftjis' );
+		my $tr_rank_img = "<tr>\n<td align=\"center\">\n<img src=\"http://image.rakuten.co.jp/hff/cabinet/mail/rank_0$rank_num.gif\">\n</td>\n</tr>\n";
 		my $tr_td_link ="<tr>\n<td align=\"center\"><a href=\"$ranking_link_list[$i]\" target=\"_blank\">\n";
 		my $tr_td_img ="<img src=\"$ranking_img_url_list[$i]\" border=\"0\" width=\"100%\"></a></td>\n</tr>\n";
 		my $tr_brand ="<tr>\n<td colspan=\"2\" align=\"center\"><font size=\"2\" color=\"#7E6E4D\">$ranking_brand_list[$i]</font></td>\n</tr>\n";
 		my $tr_name ="<tr>\n<td align=\"left\"><a href=\"$ranking_link_list[$i]\" target=\"_blank\"><font size=\"3\" color=\"#202020\">$ranking_item_list[$i]</font></a></td>\n</tr>\n</table>\n</td>\n";
-		$table_ranking_item .=$header.$tr_day.$tr_td_link.$tr_td_img.$tr_brand.$tr_name;
+		$table_ranking_item .=$header.$tr_rank_img.$tr_td_link.$tr_td_img.$tr_brand.$tr_name;
 		if($i%3 == 2){
 			$table_ranking_item .= "</tr>\n\n<tr>\n<td colspan=\"3\">\n<img src=\"http://image.rakuten.co.jp/hff/cabinet/mail/s.gif\" alt=\"\" width=\"1\" height=\"15\">\n</td>\n</tr>\n";
 		}
@@ -409,9 +404,10 @@ my $rakuten_footer =
 <table width="100%" bgcolor="#000" cellpadding="0" cellspacing="0">
 <tr>
 <td align="center" height="80" valign="middle">
-<font color="#fff" size="1">
+<p><font color="#fff" size="1">
 Copyright &copy; Newgene Ltd. All Rights Reserved.
 </font>
+</p>
 </td>
 </tr>
 </table>
