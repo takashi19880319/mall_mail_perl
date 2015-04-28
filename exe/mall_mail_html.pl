@@ -401,13 +401,12 @@ Encode::from_to( $rakuten_ranking_item_footer, 'utf8', 'shiftjis' );
 my $rakuten_footer =
 <<"HTML_STR_5";
 <!-- フッター start-->
-<table width="100%" bgcolor="#000" cellpadding="0" cellspacing="0">
+<table width="96%" bgcolor="#000000" cellpadding="0" cellspacing="0">
 <tr>
-<td align="center" height="80" valign="middle">
-<p><font color="#fff" size="1">
-Copyright &copy; Newgene Ltd. All Rights Reserved.
-</font>
-</p>
+<td align="center" height="30" valign="middle">
+<p><font color="#ffffff" size="1">
+Copyright &copy; Newgene Ltd. All Rights Reserved.</font></p>
+
 </td>
 </tr>
 </table>
