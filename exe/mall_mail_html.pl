@@ -114,38 +114,38 @@ $yahoo_renew = Encode::encode('Shift_JIS', $yahoo_renew);
 # print $yahoo_renew."\n";
 
 ####################
-## HTMLの中の要素取得
+## 楽天店のHTMLの中の要素取得
 ####################
 
 ####### 楽天 #######
 
 ## 新着商品 ##
 
-my $tree = HTML::TreeBuilder->new;
-$tree->parse($rakuten_new);
+my $tree_new = HTML::TreeBuilder->new;
+$tree_new->parse($rakuten_new);
 # ブランドのリストを作成する
-my @new_brand_list_place = $tree->look_down('class', 'itemTitle');
+my @new_brand_list_place = $tree_new->look_down('class', 'itemTitle');
 my @new_brand_list =();
 for my $brand_li (@new_brand_list_place) {
      push(@new_brand_list,$brand_li->as_text);
 }
 
 # アイテム名のリストを作成する
-my @new_item_list_place =  $tree->look_down('class', 'itemText');
+my @new_item_list_place =  $tree_new->look_down('class', 'itemText');
 my @new_item_list = ();
 for my $item_li (@new_item_list_place) {
     push (@new_item_list,$item_li->as_text);
 }
 
 # リンクのリストを作成する
-my @new_link_list_place =  $tree->find('a');
+my @new_link_list_place =  $tree_new->find('a');
 my @new_link_list = ();
 for my $link (@new_link_list_place) {
     push (@new_link_list,$link->attr('href'));
 }
 
 # 画像のリストを作成する
-my @new_img_url_list_place =  $tree->look_down('class', 'itemsA clearfix')->find('img');
+my @new_img_url_list_place =  $tree_new->look_down('class', 'itemsA clearfix')->find('img');
 my @new_img_url_list =();
 for my $img_li (@new_img_url_list_place) {
     my $img_src = "";
@@ -234,7 +234,85 @@ for my $img_li (@ranking_img_url_list_place) {
 }
 
 ####################
-## HTMLの作成
+## ヤフー店のHTMLの中の要素取得
+####################
+
+####### ヤフー #######
+
+## 新着商品 ##
+
+my $tree_new_y = HTML::TreeBuilder->new;
+$tree_new_y->parse($yahoo_new);
+# ブランドのリストを作成する
+my @new_brand_list_place_y = $tree_new_y->look_down('class', 'itemTitle');
+my @new_brand_list_y =();
+for my $brand_li (@new_brand_list_place_y) {
+     push(@new_brand_list_y,$brand_li->as_text);
+}
+
+# アイテム名のリストを作成する
+my @new_item_list_place_y =  $tree_new_y->look_down('class', 'itemText');
+my @new_item_list_y = ();
+for my $item_li (@new_item_list_place_y) {
+    push (@new_item_list_y,$item_li->as_text);
+}
+
+# リンクのリストを作成する
+my @new_link_list_place_y =  $tree_new_y->find('a');
+my @new_link_list_y = ();
+for my $link (@new_link_list_place_y) {
+    push (@new_link_list_y,$link->attr('href'));
+}
+
+# 画像のリストを作成する
+my @new_img_url_list_place_y =  $tree_new_y->look_down('class', 'itemsA clearfix')->find('img');
+my @new_img_url_list_y =();
+for my $img_li (@new_img_url_list_place_y) {
+    my $img_src = "";
+    $img_src = $img_li->attr('src');
+    $img_src =~ s/thumbnail.//g;
+    $img_src =~ s/\/\@0_mall//g;
+    $img_src =~ s/\?_ex=142x142//g;
+    push (@new_img_url_list_y,$img_src);
+}
+## 再入荷商品 ##
+my $tree_renew_y = HTML::TreeBuilder->new;
+$tree_renew_y->parse($yahoo_renew);
+# ブランドのリストを作成する
+my @renew_brand_list_place_y = $tree_renew_y->look_down('class', 'itemTitle');
+my @renew_brand_list_y =();
+for my $brand_li (@renew_brand_list_place_y) {
+     push(@renew_brand_list_y,$brand_li->as_text);
+}
+
+# アイテム名のリストを作成する
+my @renew_item_list_place_y =  $tree_renew_y->look_down('class', 'itemText');
+my @renew_item_list_y = ();
+for my $item_li (@renew_item_list_place_y) {
+    push (@renew_item_list_y,$item_li->as_text);
+}
+
+# リンクのリストを作成する
+my @renew_link_list_place_y =  $tree_renew_y->find('a');
+my @renew_link_list_y = ();
+for my $link (@renew_link_list_place_y) {
+    push (@renew_link_list_y,$link->attr('href'));
+}
+
+# 画像のリストを作成する
+my @renew_img_url_list_place_y =  $tree_renew_y->look_down('class', 'itemsA clearfix')->find('img');
+my @renew_img_url_list_y =();
+for my $img_li (@renew_img_url_list_place_y) {
+    my $img_src = "";
+    $img_src = $img_li->attr('src');
+    $img_src =~ s/thumbnail.//g;
+    $img_src =~ s/\/\@0_mall//g;
+    $img_src =~ s/\?_ex=142x142//g;
+    push (@renew_img_url_list_y,$img_src);
+}
+
+####################
+## 楽天店のHTMLの作成
 ####################
 
 # 楽天店用のHTML
@@ -423,6 +501,161 @@ Encode::from_to($rakuten_footer, 'utf8', 'shiftjis');
 	# HTMLファイルに書き込み
 	print $output_rhtml_file_disc $rakuten_html;
 	close $output_rhtml_file_disc;
+	
+####################
+## ヤフー店のHTMLの作成
+####################
+
+# ヤフー店用のHTML
+my $yahoo_html ="";
+# HTMLのヘッダー・共通部分
+my $yahoo_html_header = 
+<<"HTML_STR_1";
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-2022-jp" />
+<title>ハイ・ファッション・ファクトリー</title>
+</head>
+<body>
+<div align="center">
+
+<a href="http://store.shopping.yahoo.co.jp/hff/" target="_blank"><img src="http://shopping.geocities.jp/hff/img/mail/mailmagazine_header.gif" alt="HIGH FASHION FACTORY" border="0" width="100%"/></a>
+
+<!-- バナー×２ start-->
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+<tr>
+<td width="50%">
+<a href="http://store.shopping.yahoo.co.jp/hff/cj.html" target="_blank"><img src="http://shopping.c.yimg.jp/lib/hff/crocket_150324.jpg" alt="" width="100%" border="0"></a>
+</td>
+<td width="50%">
+<a href="http://store.shopping.yahoo.co.jp/hff/pell.html" target="_blank"><img src="http://shopping.geocities.jp/hff/img/home/pelle_150324_2.jpg" alt="" width="100%" border="0"></a>
+</td>
+</tr>
+</table>
+<!-- バナー×２ end-->
+
+<!-- 新着商品 start-->
+HTML_STR_1
+	Encode::from_to( $yahoo_html_header, 'utf8', 'shiftjis' );
+	# HTMLのヘッダーを追加
+	$yahoo_html .= $yahoo_html_header;
+# 新着商品スタート
+my $yahoo_newitem_banner =
+<<"HTML_STR_2";
+<br>
+<img src="http://shopping.geocities.jp/hff/img/mail/mailmagazine_new.gif" alt="新着商品" width="100%">
+
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+HTML_STR_2
+Encode::from_to( $yahoo_newitem_banner, 'utf8', 'shiftjis' );
+	my $table_new_item_y ="";
+	$table_new_item_y .= $yahoo_newitem_banner;
+	for(my $i=0; $i<=8; $i++) {
+		# 大枠tableの行挿入
+		if($i%3 == 0){
+			$table_new_item_y .="<tr valign=\"top\">\n";
+		}
+		my $header ="<td width=\"32%\">\n<table width=\"100%\" cellpadding=\"0\" cellspacing=\"1\">\n";
+		# 最初の3つのtdのみ<td width="32%">
+		if($i>=3){
+			$header ="<td>\n<table width=\"100%\" cellpadding=\"0\" cellspacing=\"1\">\n";
+		}
+		my $mon_h = $mon+1;
+		my $tr_day = "<tr>\n<td height=\"19\" align=\"center\" bgcolor=\"#EEEEEE\"><font size=\"6\">$mon_h月$mday日</font></td>\n</tr>\n";
+		Encode::from_to( $tr_day, 'utf8', 'shiftjis' );
+		my $tr_td_link ="<tr>\n<td align=\"center\"><a href=\"$new_link_list_y[$i]\" target=\"_blank\">\n";
+		my $tr_td_img ="<img src=\"$new_img_url_list_y[$i]\" border=\"0\" width=\"100%\"></a></td>\n</tr>\n";
+		my $tr_brand ="<tr>\n<td colspan=\"2\" align=\"center\"><font size=\"6\" color=\"#7E6E4D\">$new_brand_list_y[$i]</font></td>\n</tr>\n";
+		my $tr_name ="<tr>\n<td align=\"left\"><a href=\"$new_link_list_y[$i]\" target=\"_blank\"><font size=\"3\" color=\"#202020\">$new_item_list_y[$i]</font></a></td>\n</tr>\n</table>\n</td>\n";
+		$table_new_item_y .=$header.$tr_day.$tr_td_link.$tr_td_img.$tr_brand.$tr_name;
+		if($i%3 == 2){
+			$table_new_item_y .= "</tr>\n\n<tr>\n<td colspan=\"6\">\n<img src=\"http://shopping.geocities.jp/hff/img/mail/s.gif\" alt=\"\" width=\"1\" height=\"15\">\n</td>\n</tr>";
+		}
+	}
+# 新着商品エンド
+my $yahoo_newitem_footer =
+<<"HTML_STR_3";
+</table>
+<!-- 新着商品 end-->
+HTML_STR_3
+Encode::from_to( $yahoo_newitem_footer, 'utf8', 'shiftjis' );
+	$table_new_item_y .= $yahoo_newitem_footer;
+	# 新着エリアをHTMLに追加
+	$yahoo_html .= $table_new_item_y;
+
+# 再入荷商品スタート
+my $yahoo_renewitem_banner =
+<<"HTML_STR_4";
+
+<!-- 再入荷商品 start-->
+<img src="http://shopping.geocities.jp/hff/img/mail/mailmagazine_re.gif" alt="再入荷商品" width="100%">
+
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+HTML_STR_4
+Encode::from_to( $yahoo_renewitem_banner, 'utf8', 'shiftjis' );
+	my $table_renew_item_y ="";
+	$table_renew_item_y .= $yahoo_renewitem_banner;
+	for(my $i=0; $i<=5; $i++) {
+		# 大枠tableの行挿入
+		if($i%3 == 0){
+			$table_renew_item_y .="<tr valign=\"top\">\n";
+		}
+		my $header ="<td width=\"32%\">\n<table width=\"100%\" cellpadding=\"0\" cellspacing=\"1\">\n";
+		# 最初の3つのtdのみ<td width="32%">
+		if($i>=3){
+			$header ="<td>\n<table width=\"100%\" cellpadding=\"0\" cellspacing=\"1\">\n";
+		}
+		my $mon_h = $mon+1;
+		my $tr_day = "<tr>\n<td height=\"19\" align=\"center\" bgcolor=\"#EEEEEE\"><font size=\"6\">$mon_h月$mday日</font></td>\n</tr>\n";
+		Encode::from_to( $tr_day, 'utf8', 'shiftjis' );
+		my $tr_td_link ="<tr>\n<td align=\"center\"><a href=\"$renew_link_list_y[$i]\" target=\"_blank\">\n";
+		my $tr_td_img ="<img src=\"$renew_img_url_list_y[$i]\" border=\"0\" width=\"100%\"></a></td>\n</tr>\n";
+		my $tr_brand ="<tr>\n<td colspan=\"2\" align=\"center\"><font size=\"2\" color=\"#7E6E4D\">$renew_brand_list_y[$i]</font></td>\n</tr>\n";
+		my $tr_name ="<tr>\n<td align=\"left\"><a href=\"$renew_link_list_y[$i]\" target=\"_blank\"><font size=\"3\" color=\"#202020\">$renew_item_list_y[$i]</font></a></td>\n</tr>\n</table>\n</td>\n";
+		$table_renew_item_y .=$header.$tr_day.$tr_td_link.$tr_td_img.$tr_brand.$tr_name;
+		if($i%3 == 2){
+			$table_renew_item_y .= "</tr>\n\n<tr>\n<td colspan=\"3\">\n<img src=\"http://shopping.geocities.jp/hff/img/mail/s.gif\" alt=\"\" width=\"1\" height=\"15\">\n</td>\n</tr>\n";
+		}
+	}
+# 再入荷商品エンド
+my $yahoo_renewitem_footer =
+<<"HTML_STR_3";
+</table>
+<!-- 再入荷商品 end-->
+HTML_STR_3
+Encode::from_to( $yahoo_renewitem_footer, 'utf8', 'shiftjis' );
+	$table_renew_item_y .= $yahoo_renewitem_footer;
+	# 再入荷エリアをHTMLに追加
+	$yahoo_html .= $table_renew_item_y;
+
+# フッター
+my $yahoo_footer =
+<<"HTML_STR_5";
+<!-- フッター start-->
+<table width="100%" bgcolor="#000" cellpadding="0" cellspacing="0">
+<tr>
+<td align="center" height="80" valign="middle">
+<font color="#fff" size="1">
+Copyright &copy; Newgene Ltd. All Rights Reserved.
+</font>
+</td>
+</tr>
+</table>
+<!-- フッター end -->
+
+</div>
+
+</body>
+</html>
+HTML_STR_5
+Encode::from_to($yahoo_footer, 'utf8', 'shiftjis');
+	# フッターをHTMLに追加
+	$yahoo_html .= $yahoo_footer;
+	# HTMLファイルに書き込み
+	print $output_yhtml_file_disc $yahoo_html;
+	close $output_yhtml_file_disc;
+	
+	
 =pod
 ####################
 ## 各関数間に跨って使用するグローバル変数
